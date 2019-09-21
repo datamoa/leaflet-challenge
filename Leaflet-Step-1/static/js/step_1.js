@@ -9,7 +9,7 @@ d3.json(queryUrl, function (data) {
 function createMap(data) {
 
     // console.log(data);
-
+      
     // Define variables for greayscale tile layers
     var light = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
         attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
@@ -51,19 +51,18 @@ function createMap(data) {
     L.control.layers(baseMaps, overlayMaps, {
         collapsed: false
     }).addTo(myMap);
-
-    // ******************************************************************
+   
+ 
     // Use this method to find radius, pass your current earthquake object
-    // ******************************************************************
-    function getCircleSize(earthquake) {
+        function getCircleSize(earthquake) {
         var circleSize = earthquake.properties.mag * 30000
         // console.log(circleSize)
         return circleSize;
     }
 
-    // ******************************************************************
+   
     // Use this method to determine the color, pass your current earthquake object
-    // ******************************************************************
+    
     function getCircleColor(earthquake) {
         var color = ""
             if (earthquake.properties.mag > 5) {
@@ -91,7 +90,6 @@ function createMap(data) {
         var obj = [earthquake.geometry.coordinates[1], earthquake.geometry.coordinates[0]];
         return obj;
     }
-    console.log(data)
     // Loop through the cities array and create one marker for each city object
     for (var i = 0; i < data.length; i++) {
         L.circle(getLocation(data[i]), {
@@ -103,6 +101,36 @@ function createMap(data) {
         }).bindPopup(`<h3>${data[i].properties.place}</h3><hr><p>${new Date(data[i].properties.time)} </p>`).addTo(earthquakes)
     }
     //Show earthquakes by default
-    earthquakes.addTo(myMap)
-}
+    earthquakes.addTo(myMap);
 
+    function getColor (d)  {
+        return  d > 5 ? "#FF0000":
+                d > 4 ? "#FF4500":
+                d > 3 ? "#FFA500":
+                d > 2 ? "#FFD700":
+                d > 1 ? "#F0E68C":
+                d > 0 ? "#ADFF2F": "#FFEDA0F";
+    }
+
+    
+    var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (myMap) {
+        
+        var div = L.DomUtil.create('div', 'info legend');
+            grades = [0, 1, 2, 3, 4, 5],
+            labels = [`<strong>Magnitudes</strong>`];
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i class = "circle"  style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        }
+           
+        return div;
+        
+    };
+
+    legend.addTo(myMap);
+}
